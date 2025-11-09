@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTable();
     setupEventListeners();
     setupEditionTabs();
+    setupAnalysisTab(); // <-- add this line
     initChart();
     setupResizer();
 });
@@ -346,18 +347,291 @@ function initChart() {
     });
 }
 
-// Parse time string (MM:SS or HH:MM:SS) to minutes
+// Utility: Parse MM:SS or HH:MM:SS to minutes
 function parseTimeToMinutes(timeStr) {
     if (!timeStr) return null;
     const parts = timeStr.split(':');
     if (parts.length === 2) {
         return parseInt(parts[0]) + parseInt(parts[1]) / 60;
     } else if (parts.length === 3) {
-        // If it's HH:MM:SS format, convert to minutes
         return parseInt(parts[0]) * 60 + parseInt(parts[1]) + parseInt(parts[2]) / 60;
     }
     return null;
 }
+
+// Analysis: Calculate % of laps over 55 min for each athlete
+function getLapsOver55Analysis() {
+    // Only use 2025 edition
+    if (currentEdition !== '2025') return [];
+    // Use order in results.json for placement/order
+    return resultsData.map((runner, idx) => {
+        const bib = runner.Bib;
+        const laps = lapsData.filter(lap => lap.File === bib);
+        const lapTimes = laps.map(lap => parseTimeToMinutes(lap['Lap Split']));
+        const over55 = lapTimes.filter(t => t !== null && t > 55).length;
+        const percent = laps.length > 0 ? (over55 / laps.length) * 100 : 0;
+        return {
+            position: idx + 1, // 1-based index, first = last place
+            name: runner.Name,
+            percentOver55: percent,
+            laps: laps.length
+        };
+    });
+}
+
+function getLapsOver55Analysis2023() {
+    // Only use 2023 edition
+    if (currentEdition !== '2023') return [];
+    return resultsData.map((runner, idx) => {
+        const bib = runner.Bib;
+        const laps = lapsData.filter(lap => lap.File === bib);
+        const lapTimes = laps.map(lap => parseTimeToMinutes(lap['Lap Split']));
+        const over55 = lapTimes.filter(t => t !== null && t > 55).length;
+        const percent = laps.length > 0 ? (over55 / laps.length) * 100 : 0;
+        return {
+            position: idx + 1,
+            name: runner.Name,
+            percentOver55: percent,
+            laps: laps.length
+        };
+    });
+}
+
+// Analysis: Render scatter plot with line of best fit
+let analysisChart = null;
+let analysisChart2023 = null;
+function calculateEMAArray(values, windowSize = 6) {
+    if (values.length < 2) return null;
+    const emaData = [];
+    const alpha = 2 / (windowSize + 1);
+    for (let i = 0; i < values.length; i++) {
+        if (i === 0) {
+            emaData.push(values[i]);
+        } else {
+            const previousEMA = emaData[i - 1] !== null ? emaData[i - 1] : values[i];
+            const currentEMA = alpha * values[i] + (1 - alpha) * previousEMA;
+            emaData.push(currentEMA);
+        }
+    }
+    return emaData;
+}
+
+function renderAnalysisChart() {
+    const data = getLapsOver55Analysis();
+    if (!data.length) return;
+    const ctx = document.getElementById('analysisChart').getContext('2d');
+    // Reverse order so last place is left, winner is right
+    const positions = data.map(d => d.position).reverse();
+    const percents = data.map(d => d.percentOver55).reverse();
+    const names = data.map(d => d.name).reverse();
+    // Calculate EMA (window 6)
+    const emaLine = calculateEMAArray(percents, 6);
+    // Calculate line of best fit (linear regression)
+    const n = positions.length;
+    const sumX = positions.reduce((a, b) => a + b, 0);
+    const sumY = percents.reduce((a, b) => a + b, 0);
+    const sumXY = positions.reduce((a, b, i) => a + b * percents[i], 0);
+    const sumXX = positions.reduce((a, b) => a + b * b, 0);
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const fitLine = positions.map(x => slope * x + intercept);
+    // Destroy previous chart
+    if (analysisChart) analysisChart.destroy();
+    analysisChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            labels: names,
+            datasets: [
+                {
+                    label: '% Laps > 55min',
+                    data: positions.map((x, i) => ({x: names[i], y: percents[i]})),
+                    backgroundColor: '#36A2EB',
+                    pointRadius: 4
+                },
+                {
+                    label: 'Weighted Avg (EMA, 6)',
+                    type: 'line',
+                    data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
+                    borderColor: '#FF6384',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                },
+                {
+                    label: 'Best Fit',
+                    type: 'line',
+                    data: positions.map((x, i) => ({x: names[i], y: fitLine[i]})),
+                    borderColor: '#FFCE56',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: '% of Laps Over 55 Minutes by Placement (2025 Edition, EMA Window 6 & Best Fit)'
+                },
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    labels: names,
+                    title: {
+                        display: true,
+                        text: 'Athlete (Order in results.json, Last Place = left, Winner = right)'
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {size: 10}
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '% of Laps > 55min'
+                    },
+                    min: 0,
+                    max: 60
+                }
+            }
+        }
+    });
+}
+
+function renderAnalysisChart2023() {
+    const data = getLapsOver55Analysis2023();
+    if (!data.length) return;
+    const ctx = document.getElementById('analysisChart2023').getContext('2d');
+    // Reverse order so last place is left, winner is right
+    const positions = data.map(d => d.position).reverse();
+    const percents = data.map(d => d.percentOver55).reverse();
+    const names = data.map(d => d.name).reverse();
+    // Calculate EMA (window 6)
+    const emaLine = calculateEMAArray(percents, 6);
+    // Calculate line of best fit (linear regression)
+    const n = positions.length;
+    const sumX = positions.reduce((a, b) => a + b, 0);
+    const sumY = percents.reduce((a, b) => a + b, 0);
+    const sumXY = positions.reduce((a, b, i) => a + b * percents[i], 0);
+    const sumXX = positions.reduce((a, b) => a + b * b, 0);
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const fitLine = positions.map(x => slope * x + intercept);
+    // Destroy previous chart
+    if (analysisChart2023) analysisChart2023.destroy();
+    analysisChart2023 = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            labels: names,
+            datasets: [
+                {
+                    label: '% Laps > 55min',
+                    data: positions.map((x, i) => ({x: names[i], y: percents[i]})),
+                    backgroundColor: '#36A2EB',
+                    pointRadius: 4
+                },
+                {
+                    label: 'Weighted Avg (EMA, 6)',
+                    type: 'line',
+                    data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
+                    borderColor: '#FF6384',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                },
+                {
+                    label: 'Best Fit',
+                    type: 'line',
+                    data: positions.map((x, i) => ({x: names[i], y: fitLine[i]})),
+                    borderColor: '#FFCE56',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: '% of Laps Over 55 Minutes by Placement (2023 Edition, EMA Window 6 & Best Fit)'
+                },
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    labels: names,
+                    title: {
+                        display: true,
+                        text: 'Athlete (Order in results.json, Last Place = left, Winner = right)'
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {size: 10}
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '% of Laps > 55min'
+                    },
+                    min: 0,
+                    max: 60
+                }
+            }
+        }
+    });
+}
+
+// Setup analysis tab event
+function setupAnalysisTab() {
+    const analysisTab = document.getElementById('tab-analysis');
+    const analysisTab2023 = document.getElementById('tab-analysis-2023');
+    const analysisChartContainer = document.getElementById('analysisChartContainer');
+    const analysisChartContainer2023 = document.getElementById('analysisChartContainer2023');
+    const lapChartContainer = document.querySelector('.chart-container');
+    analysisTab.addEventListener('click', () => {
+        analysisChartContainer.style.display = '';
+        analysisChartContainer2023.style.display = 'none';
+        lapChartContainer.style.display = 'none';
+        document.getElementById('selectedRunners').style.display = 'none';
+        renderAnalysisChart();
+    });
+    analysisTab2023.addEventListener('click', () => {
+        analysisChartContainer.style.display = 'none';
+        analysisChartContainer2023.style.display = '';
+        lapChartContainer.style.display = 'none';
+        document.getElementById('selectedRunners').style.display = 'none';
+        renderAnalysisChart2023();
+    });
+    // Restore main chart when switching tabs
+    document.getElementById('tab-2025').addEventListener('click', () => {
+        analysisChartContainer.style.display = 'none';
+        analysisChartContainer2023.style.display = 'none';
+        lapChartContainer.style.display = '';
+        document.getElementById('selectedRunners').style.display = '';
+    });
+    document.getElementById('tab-2023').addEventListener('click', () => {
+        analysisChartContainer.style.display = 'none';
+        analysisChartContainer2023.style.display = 'none';
+        lapChartContainer.style.display = '';
+        document.getElementById('selectedRunners').style.display = '';
+    });
+}
+
 
 // Calculate statistics for a runner's laps
 function calculateStats(lapTimes) {

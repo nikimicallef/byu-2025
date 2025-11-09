@@ -31,12 +31,22 @@
         <ul class="nav nav-tabs mb-0" id="editionTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tab-2025" data-bs-toggle="tab" data-edition="2025" type="button" role="tab">
-                    2025
+                    2025 Edition
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tab-2023" data-bs-toggle="tab" data-edition="2023" type="button" role="tab">
-                    2023
+                    2023 Edition
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-analysis" type="button" role="tab">
+                    Analysis 2025
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-analysis-2023" type="button" role="tab">
+                    Analysis 2023
                 </button>
             </li>
         </ul>
@@ -72,10 +82,8 @@
                     <a href="https://my.raceresult.com/266852/results#0_B3DC1F" target="_blank" rel="noopener noreferrer">Data source 2023</a>
                 </div>
             </div>
-
             <!-- Divider -->
             <div id="divider" class="divider"></div>
-
             <!-- Right Panel: Chart -->
             <div id="rightPanel" class="split-panel">
                 <div class="chart-container">
@@ -85,6 +93,13 @@
                     <div id="selectedRunners" class="d-flex flex-wrap gap-2">
                         <!-- Selected runner badges will appear here -->
                     </div>
+                </div>
+                <!-- Analysis Chart Container -->
+                <div id="analysisChartContainer" style="display:none; margin-top:30px;">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+                <div id="analysisChartContainer2023" style="display:none; margin-top:30px;">
+                    <canvas id="analysisChart2023"></canvas>
                 </div>
             </div>
         </div>
