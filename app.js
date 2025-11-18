@@ -50,6 +50,8 @@ async function loadData() {
 
         console.log(`${currentEdition} Results loaded:`, resultsData.length);
         console.log(`${currentEdition} Laps loaded:`, lapsData.length);
+
+        analyzeLastLapIn24HourDay();
     } catch (error) {
         console.error('Error loading data:', error);
     }
@@ -269,7 +271,8 @@ function initChart() {
             maintainAspectRatio: false,
             plugins: {
                 title: {
-                    display: false
+                    display: false,
+                    font: {size: 24} // Larger title font
                 },
                 subtitle: {
                     display: true,
@@ -278,12 +281,14 @@ function initChart() {
                     align: 'start',
                     padding: {
                         bottom: 10
-                    }
+                    },
+                    font: {size: 18} // Larger subtitle font
                 },
                 legend: {
                     display: true,
                     position: 'top',
                     labels: {
+                        font: {size: 16}, // Larger legend font
                         filter: function(legendItem, chartData) {
                             // Hide "Upper Std Dev" from legend
                             return !legendItem.text.includes('Upper Std Dev');
@@ -317,24 +322,32 @@ function initChart() {
                 },
                 tooltip: {
                     mode: 'index',
-                    intersect: false
+                    intersect: false,
+                    titleFont: {size: 18},
+                    bodyFont: {size: 16}
                 }
             },
             scales: {
                 x: {
                     title: {
                         display: true,
-                        text: 'Lap Split Times (Trail: 11 hours, Road: 13 hours)'
+                        text: 'Lap Split Times (Trail: 11 hours, Road: 13 hours)',
+                        font: {size: 18} // Larger axis label font
+                    },
+                    ticks: {
+                        font: {size: 14} // Larger tick font
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'Time (minutes)'
+                        text: 'Time (minutes)',
+                        font: {size: 18} // Larger axis label font
                     },
                     min: 30,
                     max: 60,
                     ticks: {
+                        font: {size: 14}, // Larger tick font
                         callback: function(value) {
                             const mins = Math.floor(value);
                             const secs = Math.round((value - mins) * 60);
@@ -368,13 +381,18 @@ function getLapsOver55Analysis() {
         const bib = runner.Bib;
         const laps = lapsData.filter(lap => lap.File === bib);
         const lapTimes = laps.map(lap => parseTimeToMinutes(lap['Lap Split']));
-        const over55 = lapTimes.filter(t => t !== null && t > 55).length;
-        const percent = laps.length > 0 ? (over55 / laps.length) * 100 : 0;
+        const n = lapTimes.length;
+        if (n === 0) return { position: idx + 1, name: runner.Name, percentOver55: 0, laps: 0 };
+        // Only consider second half
+        const startIdx = Math.floor(n / 2);
+        const secondHalfLapTimes = lapTimes.slice(startIdx);
+        const over55 = secondHalfLapTimes.filter(t => t !== null && t > 55).length;
+        const percent = secondHalfLapTimes.length > 0 ? (over55 / secondHalfLapTimes.length) * 100 : 0;
         return {
-            position: idx + 1, // 1-based index, first = last place
+            position: idx + 1,
             name: runner.Name,
             percentOver55: percent,
-            laps: laps.length
+            laps: secondHalfLapTimes.length
         };
     });
 }
@@ -386,13 +404,18 @@ function getLapsOver55Analysis2023() {
         const bib = runner.Bib;
         const laps = lapsData.filter(lap => lap.File === bib);
         const lapTimes = laps.map(lap => parseTimeToMinutes(lap['Lap Split']));
-        const over55 = lapTimes.filter(t => t !== null && t > 55).length;
-        const percent = laps.length > 0 ? (over55 / laps.length) * 100 : 0;
+        const n = lapTimes.length;
+        if (n === 0) return { position: idx + 1, name: runner.Name, percentOver55: 0, laps: 0 };
+        // Only consider second half
+        const startIdx = Math.floor(n / 2);
+        const secondHalfLapTimes = lapTimes.slice(startIdx);
+        const over55 = secondHalfLapTimes.filter(t => t !== null && t > 55).length;
+        const percent = secondHalfLapTimes.length > 0 ? (over55 / secondHalfLapTimes.length) * 100 : 0;
         return {
             position: idx + 1,
             name: runner.Name,
             percentOver55: percent,
-            laps: laps.length
+            laps: secondHalfLapTimes.length
         };
     });
 }
@@ -424,8 +447,24 @@ function renderAnalysisChart() {
     const positions = data.map(d => d.position).reverse();
     const percents = data.map(d => d.percentOver55).reverse();
     const names = data.map(d => d.name).reverse();
+    // const lapsCompleted = data.map(d => d.laps).reverse();
+    // Calculate laps over 55 min in second half for correlation
+    const lapsOver55 = getLapsOver55Analysis().map(d => d.laps * d.percentOver55 / 100).reverse();
+    // Calculate correlation between lapsOver55 and position
+    let r = 0;
+    if (positions.length > 1) {
+        const avgX = positions.reduce((a, b) => a + b, 0) / positions.length;
+        const avgY = lapsOver55.reduce((a, b) => a + b, 0) / lapsOver55.length;
+        let numR = 0, denX = 0, denY = 0;
+        for (let i = 0; i < positions.length; i++) {
+            numR += (positions[i] - avgX) * (lapsOver55[i] - avgY);
+            denX += (positions[i] - avgX) ** 2;
+            denY += (lapsOver55[i] - avgY) ** 2;
+        }
+        r = numR / Math.sqrt(denX * denY);
+    }
     // Calculate EMA (window 6)
-    const emaLine = calculateEMAArray(percents, 6);
+    // const emaLine = calculateEMAArray(percents, 6);
     // Calculate line of best fit (linear regression)
     const n = positions.length;
     const sumX = positions.reduce((a, b) => a + b, 0);
@@ -436,27 +475,43 @@ function renderAnalysisChart() {
     const intercept = (sumY - slope * sumX) / n;
     const fitLine = positions.map(x => slope * x + intercept);
     // Destroy previous chart
+    analyzeContributions();
     if (analysisChart) analysisChart.destroy();
     analysisChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bar',
         data: {
             labels: names,
             datasets: [
+                // {
+                //     type: 'bar',
+                //     label: 'Number of Laps',
+                //     data: lapsCompleted,
+                //     backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                //     yAxisID: 'y1',
+                //     order: 1,
+                //     barPercentage: 0.8,
+                //     categoryPercentage: 0.8
+                // },
                 {
                     label: '% Laps > 55min',
+                    type: 'scatter',
                     data: positions.map((x, i) => ({x: names[i], y: percents[i]})),
                     backgroundColor: '#36A2EB',
-                    pointRadius: 4
+                    pointRadius: 4,
+                    yAxisID: 'y',
+                    order: 2
                 },
-                {
-                    label: 'Weighted Avg (EMA, 6)',
-                    type: 'line',
-                    data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
-                    borderColor: '#FF6384',
-                    borderWidth: 2,
-                    fill: false,
-                    pointRadius: 0
-                },
+                // {
+                //     label: 'Weighted Avg (EMA, 6)',
+                //     type: 'line',
+                //     data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
+                //     borderColor: '#FF6384',
+                //     borderWidth: 2,
+                //     fill: false,
+                //     pointRadius: 0,
+                //     yAxisID: 'y',
+                //     order: 3
+                // },
                 {
                     label: 'Best Fit',
                     type: 'line',
@@ -464,19 +519,50 @@ function renderAnalysisChart() {
                     borderColor: '#FFCE56',
                     borderWidth: 2,
                     fill: false,
-                    pointRadius: 0
+                    pointRadius: 0,
+                    yAxisID: 'y',
+                    order: 4
                 }
             ]
         },
+        // plugins: [{
+        //     id: 'dayNightLines',
+        //     beforeDraw: (chart) => {
+        //         const positions = chart.options.plugins.dayNightLines.positions;
+        //         const yScale = chart.scales.y1;
+        //         const chartArea = chart.chartArea;
+        //         if (!yScale || !chartArea) return;
+        //         const ctx = chart.ctx;
+        //         ctx.save();
+        //         ctx.strokeStyle = '#888';
+        //         ctx.setLineDash([6, 6]);
+        //         positions.forEach(pos => {
+        //             const y = yScale.getPixelForValue(pos);
+        //             ctx.beginPath();
+        //             ctx.moveTo(chartArea.left, y);
+        //             ctx.lineTo(chartArea.right, y);
+        //             ctx.stroke();
+        //         });
+        //         ctx.setLineDash([]);
+        //         ctx.restore();
+        //     }
+        // }],
         options: {
             plugins: {
                 title: {
                     display: true,
-                    text: '% of Laps Over 55 Minutes by Placement (2025 Edition, EMA Window 6 & Best Fit)'
+                    text: `% of Laps Over 55 Minutes in 2nd Half by Placement (2025) - r = ${r.toFixed(3)}`,
+                    font: {size: 24}
                 },
                 legend: {
-                    display: true
+                    display: true,
+                    labels: {font: {size: 16}}
                 }
+                // ,
+                // dayNightLines: {
+                //     enabled: true,
+                //     positions: [11, 24, 35, 48, 59, 72, 83, 96, 107]
+                // }
             },
             scales: {
                 x: {
@@ -484,23 +570,40 @@ function renderAnalysisChart() {
                     labels: names,
                     title: {
                         display: true,
-                        text: 'Athlete (Order in results.json, Last Place = left, Winner = right)'
+                        text: 'Athlete (Last Place = left, Winner = right)',
+                        font: {size: 18}
                     },
                     ticks: {
                         autoSkip: false,
                         maxRotation: 45,
                         minRotation: 45,
-                        font: {size: 10}
+                        font: {size: 14}
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: '% of Laps > 55min'
+                        text: '% of Laps > 55min',
+                        font: {size: 18}
                     },
                     min: 0,
-                    max: 60
+                    max: 100,
+                    position: 'left',
+                    ticks: {font: {size: 14}}
                 }
+                // ,
+                // y1: {
+                //     title: {
+                //         display: true,
+                //         text: 'Number of Laps'
+                //     },
+                //     min: 0,
+                //     max: Math.max(...lapsCompleted) + 2,
+                //     position: 'right',
+                //     grid: {
+                //         drawOnChartArea: false
+                //     }
+                // }
             }
         }
     });
@@ -514,8 +617,24 @@ function renderAnalysisChart2023() {
     const positions = data.map(d => d.position).reverse();
     const percents = data.map(d => d.percentOver55).reverse();
     const names = data.map(d => d.name).reverse();
+    // const lapsCompleted = data.map(d => d.laps).reverse();
+    // Calculate laps over 55 min in second half for correlation
+    const lapsOver55 = getLapsOver55Analysis2023().map(d => d.laps * d.percentOver55 / 100).reverse();
+    // Calculate correlation between lapsOver55 and position
+    let r = 0;
+    if (positions.length > 1) {
+        const avgX = positions.reduce((a, b) => a + b, 0) / positions.length;
+        const avgY = lapsOver55.reduce((a, b) => a + b, 0) / lapsOver55.length;
+        let numR = 0, denX = 0, denY = 0;
+        for (let i = 0; i < positions.length; i++) {
+            numR += (positions[i] - avgX) * (lapsOver55[i] - avgY);
+            denX += (positions[i] - avgX) ** 2;
+            denY += (lapsOver55[i] - avgY) ** 2;
+        }
+        r = numR / Math.sqrt(denX * denY);
+    }
     // Calculate EMA (window 6)
-    const emaLine = calculateEMAArray(percents, 6);
+    // const emaLine = calculateEMAArray(percents, 6);
     // Calculate line of best fit (linear regression)
     const n = positions.length;
     const sumX = positions.reduce((a, b) => a + b, 0);
@@ -527,26 +646,42 @@ function renderAnalysisChart2023() {
     const fitLine = positions.map(x => slope * x + intercept);
     // Destroy previous chart
     if (analysisChart2023) analysisChart2023.destroy();
+    analyzeContributions();
     analysisChart2023 = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bar',
         data: {
             labels: names,
             datasets: [
+                // {
+                //     type: 'bar',
+                //     label: 'Number of Laps',
+                //     data: lapsCompleted,
+                //     backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                //     yAxisID: 'y1',
+                //     order: 1,
+                //     barPercentage: 0.8,
+                //     categoryPercentage: 0.8
+                // },
                 {
                     label: '% Laps > 55min',
+                    type: 'scatter',
                     data: positions.map((x, i) => ({x: names[i], y: percents[i]})),
                     backgroundColor: '#36A2EB',
-                    pointRadius: 4
+                    pointRadius: 4,
+                    yAxisID: 'y',
+                    order: 2
                 },
-                {
-                    label: 'Weighted Avg (EMA, 6)',
-                    type: 'line',
-                    data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
-                    borderColor: '#FF6384',
-                    borderWidth: 2,
-                    fill: false,
-                    pointRadius: 0
-                },
+                // {
+                //     label: 'Weighted Avg (EMA, 6)',
+                //     type: 'line',
+                //     data: positions.map((x, i) => ({x: names[i], y: emaLine[i]})),
+                //     borderColor: '#FF6384',
+                //     borderWidth: 2,
+                //     fill: false,
+                //     pointRadius: 0,
+                //     yAxisID: 'y',
+                //     order: 3
+                // },
                 {
                     label: 'Best Fit',
                     type: 'line',
@@ -554,19 +689,50 @@ function renderAnalysisChart2023() {
                     borderColor: '#FFCE56',
                     borderWidth: 2,
                     fill: false,
-                    pointRadius: 0
+                    pointRadius: 0,
+                    yAxisID: 'y',
+                    order: 4
                 }
             ]
         },
+        // plugins: [{
+        //     id: 'dayNightLines2023',
+        //     beforeDraw: (chart) => {
+        //         const positions = chart.options.plugins.dayNightLines.positions;
+        //         const yScale = chart.scales.y1;
+        //         const chartArea = chart.chartArea;
+        //         if (!yScale || !chartArea) return;
+        //         const ctx = chart.ctx;
+        //         ctx.save();
+        //         ctx.strokeStyle = '#888';
+        //         ctx.setLineDash([6, 6]);
+        //         positions.forEach(pos => {
+        //             const y = yScale.getPixelForValue(pos);
+        //             ctx.beginPath();
+        //             ctx.moveTo(chartArea.left, y);
+        //             ctx.lineTo(chartArea.right, y);
+        //             ctx.stroke();
+        //         });
+        //         ctx.setLineDash([]);
+        //         ctx.restore();
+        //     }
+        // }],
         options: {
             plugins: {
                 title: {
                     display: true,
-                    text: '% of Laps Over 55 Minutes by Placement (2023 Edition, EMA Window 6 & Best Fit)'
+                    text: `% of Laps Over 55 Minutes in 2nd Half by Placement (2023) - r = ${r.toFixed(3)}`,
+                    font: {size: 24}
                 },
                 legend: {
-                    display: true
+                    display: true,
+                    labels: {font: {size: 16}}
                 }
+                // ,
+                // dayNightLines: {
+                //     enabled: true,
+                //     positions: [11, 24, 35, 48, 59, 72, 83, 96, 107]
+                // }
             },
             scales: {
                 x: {
@@ -574,38 +740,311 @@ function renderAnalysisChart2023() {
                     labels: names,
                     title: {
                         display: true,
-                        text: 'Athlete (Order in results.json, Last Place = left, Winner = right)'
+                        text: 'Athlete (Last Place = left, Winner = right)',
+                        font: {size: 18}
                     },
                     ticks: {
                         autoSkip: false,
                         maxRotation: 45,
                         minRotation: 45,
-                        font: {size: 10}
+                        font: {size: 14}
                     }
                 },
                 y: {
                     title: {
                         display: true,
-                        text: '% of Laps > 55min'
+                        text: '% of Laps > 55min',
+                        font: {size: 18}
                     },
                     min: 0,
-                    max: 60
+                    max: 60,
+                    position: 'left',
+                    ticks: {font: {size: 14}}
                 }
+                // ,
+                // y1: {
+                //     title: {
+                //         display: true,
+                //         text: 'Number of Laps'
+                //     },
+                //     min: 0,
+                //     max: Math.max(...lapsCompleted) + 2,
+                //     position: 'right',
+                //     grid: {
+                //         drawOnChartArea: false
+                //     }
+                // }
             }
         }
     });
+}
+
+// Correlation: Calculate Pearson correlation coefficient
+let correlationChart = null;
+function calculatePearsonCorrelation(x, y) {
+    const n = x.length;
+    const avgX = x.reduce((a, b) => a + b, 0) / n;
+    const avgY = y.reduce((a, b) => a + b, 0) / n;
+    let num = 0, denX = 0, denY = 0;
+    for (let i = 0; i < n; i++) {
+        num += (x[i] - avgX) * (y[i] - avgY);
+        denX += (x[i] - avgX) ** 2;
+        denY += (y[i] - avgY) ** 2;
+    }
+    return num / Math.sqrt(denX * denY);
+}
+
+function getCombinedCorrelationData() {
+    // Load both results.json files for 2023 and 2025
+    // This function assumes resultsData is for the current edition, but we want both
+    // We'll fetch both synchronously for charting
+    // Use cached data if available
+    if (window.combinedCorrelationData) return window.combinedCorrelationData;
+    window.combinedCorrelationData = [];
+    // Synchronous fetch (since this is for charting, not UI)
+    const req2023 = new XMLHttpRequest();
+    req2023.open('GET', getDataUrl('results.json').replace('data_2025', 'data_2023'), false);
+    req2023.send(null);
+    let data2023 = [];
+    if (req2023.status === 200) {
+        try { data2023 = JSON.parse(req2023.responseText); } catch {}
+    }
+    const req2025 = new XMLHttpRequest();
+    req2025.open('GET', getDataUrl('results.json').replace('data_2023', 'data_2025'), false);
+    req2025.send(null);
+    let data2025 = [];
+    if (req2025.status === 200) {
+        try { data2025 = JSON.parse(req2025.responseText); } catch {}
+    }
+    window.combinedCorrelationData = [...data2023, ...data2025].filter(r => r.ItraScore !== undefined && r.Laps !== undefined && Number(r.ItraScore) > 0);
+    return window.combinedCorrelationData;
+}
+
+function renderCorrelationChart() {
+    const data = getCombinedCorrelationData();
+    const itraScores = data.map(r => Number(r.ItraScore));
+    const laps = data.map(r => Number(r.Laps));
+    // Calculate line of best fit
+    const n = itraScores.length;
+    const xMean = itraScores.reduce((a,b) => a+b,0)/n;
+    const yMean = laps.reduce((a,b) => a+b,0)/n;
+    const num = itraScores.map((xi,i) => (xi-xMean)*(laps[i]-yMean)).reduce((a,b) => a+b,0);
+    const den = itraScores.map(xi => (xi-xMean)**2).reduce((a,b) => a+b,0);
+    const slope = num/den;
+    const intercept = yMean - slope*xMean;
+    // Prepare line points
+    const xMin = Math.min(...itraScores);
+    const xMax = Math.max(...itraScores);
+    const fitYMin = slope*xMin + intercept;
+    const fitYMax = slope*xMax + intercept;
+    // Calculate Pearson correlation coefficient
+    let r = 0;
+    if (itraScores.length > 1) {
+        const avgX = xMean;
+        const avgY = yMean;
+        let numR = 0, denX = 0, denY = 0;
+        for (let i = 0; i < n; i++) {
+            numR += (itraScores[i] - avgX) * (laps[i] - avgY);
+            denX += (itraScores[i] - avgX) ** 2;
+            denY += (laps[i] - avgY) ** 2;
+        }
+        r = numR / Math.sqrt(denX * denY);
+    }
+    if (correlationChart) correlationChart.destroy();
+    const ctx = document.getElementById('correlationChart').getContext('2d');
+    correlationChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Athletes',
+                    data: data.map(r => ({x: Number(r.ItraScore), y: Number(r.Laps), name: r.Name})),
+                    backgroundColor: '#36A2EB',
+                },
+                {
+                    label: 'Correlation Line',
+                    type: 'line',
+                    data: [
+                        {x: xMin, y: fitYMin},
+                        {x: xMax, y: fitYMax}
+                    ],
+                    borderColor: '#FFCE56',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    showLine: true,
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {position: 'top', labels: {font: {size: 16}}},
+                title: {display: true, text: `ITRA Score vs. Laps Completed (2023 & 2025 Combined) — r = ${r.toFixed(3)}`, font: {size: 24}},
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const d = context.raw;
+                            if (d.name) {
+                                return `${d.name}: ITRA ${d.x}, Laps ${d.y}`;
+                            }
+                            return `ITRA ${d.x}, Laps ${d.y}`;
+                        }
+                    },
+                    titleFont: {size: 18},
+                    bodyFont: {size: 16}
+                }
+            },
+            scales: {
+                x: {
+                    title: {display: true, text: 'ITRA Score', font: {size: 18}},
+                    min: xMin,
+                    max: xMax,
+                    ticks: {font: {size: 14}}
+                },
+                y: {
+                    title: {display: true, text: 'Laps Completed', font: {size: 18}},
+                    ticks: {font: {size: 14}}
+                }
+            }
+        }});
+}
+
+// Correlation: UTMB finishing time vs ITRA score
+let correlationChartUTMB = null;
+
+function parseTimeToMinutesUTMB(timeStr) {
+    // Format: HH:MM:SS
+    const [h, m, s] = timeStr.split(':').map(Number);
+    return h * 60 + m + s / 60;
+}
+
+function getUTMBCorrelationData() {
+    // Synchronous fetch of CSV
+    const req = new XMLHttpRequest();
+    req.open('GET', './data_utmb/results.csv', false);
+    req.send(null);
+    let rows = [];
+    if (req.status === 200) {
+        rows = req.responseText.trim().split('\n').slice(1); // skip header
+    }
+    const data = rows.map(row => {
+        const [time, itra] = row.split(',');
+        return {
+            time: parseTimeToMinutesUTMB(time),
+            itra: Number(itra),
+            label: time + ' / ' + itra
+        };
+    });
+    return data;
+}
+
+function renderCorrelationChartUTMB() {
+    let data = getUTMBCorrelationData();
+    // Sort by ITRA score ascending (lowest to highest)
+    data = data.sort((a, b) => a.itra - b.itra);
+    const itras = data.map(d => d.itra);
+    const times = data.map(d => d.time);
+    // Linear regression: y = finishing time, x = ITRA score
+    const n = itras.length;
+    const xMean = itras.reduce((a,b) => a+b,0)/n;
+    const yMean = times.reduce((a,b) => a+b,0)/n;
+    const num = itras.map((xi,i) => (xi-xMean)*(times[i]-yMean)).reduce((a,b) => a+b,0);
+    const den = itras.map(xi => (xi-xMean)**2).reduce((a,b) => a+b,0);
+    const slope = num/den;
+    const intercept = yMean - slope*xMean;
+    // Prepare line points
+    const xMin = Math.min(...itras);
+    const xMax = Math.max(...itras);
+    const fitYMin = slope*xMin + intercept;
+    const fitYMax = slope*xMax + intercept;
+    // Pearson correlation
+    let r = 0;
+    if (itras.length > 1) {
+        let numR = 0, denX = 0, denY = 0;
+        for (let i = 0; i < n; i++) {
+            numR += (itras[i] - xMean) * (times[i] - yMean);
+            denX += (itras[i] - xMean) ** 2;
+            denY += (times[i] - yMean) ** 2;
+        }
+        r = numR / Math.sqrt(denX * denY);
+    }
+    if (correlationChartUTMB) correlationChartUTMB.destroy();
+    const ctx = document.getElementById('correlationChartUTMB').getContext('2d');
+    correlationChartUTMB = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Athletes',
+                    data: data.map(d => ({x: d.itra, y: d.time, label: d.label})),
+                    backgroundColor: '#36A2EB',
+                },
+                {
+                    label: 'Correlation Line',
+                    type: 'line',
+                    data: [
+                        {x: xMin, y: fitYMin},
+                        {x: xMax, y: fitYMax}
+                    ],
+                    borderColor: '#FFCE56',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    showLine: true,
+                }
+            ]
+        },
+        options: {
+            plugins: {
+                legend: {position: 'top', labels: {font: {size: 16}}},
+                title: {display: true, text: `ITRA Score vs. Finishing Time - r = ${r.toFixed(3)}`, font: {size: 24}},
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const d = context.raw;
+                            if (d.label) {
+                                return d.label;
+                            }
+                            return `ITRA ${d.x}, Time ${d.y}`;
+                        }
+                    },
+                    titleFont: {size: 18},
+                    bodyFont: {size: 16}
+                }
+            },
+            scales: {
+                x: {
+                    title: {display: true, text: 'ITRA Score', font: {size: 18}},
+                    min: xMin,
+                    max: xMax,
+                    ticks: {font: {size: 14}}
+                },
+                y: {
+                    title: {display: true, text: 'Finishing Time (minutes)', font: {size: 18}},
+                    min: Math.min(...times),
+                    max: Math.max(...times),
+                    ticks: {font: {size: 14}}
+                }
+            }
+        }});
 }
 
 // Setup analysis tab event
 function setupAnalysisTab() {
     const analysisTab = document.getElementById('tab-analysis');
     const analysisTab2023 = document.getElementById('tab-analysis-2023');
+    const correlationTab = document.getElementById('tab-correlation');
+    const utmbCorrelationTab = document.getElementById('tab-correlation-utmb');
     const analysisChartContainer = document.getElementById('analysisChartContainer');
     const analysisChartContainer2023 = document.getElementById('analysisChartContainer2023');
+    const correlationChartContainer = document.getElementById('correlationChartContainer');
+    const correlationChartContainerUTMB = document.getElementById('correlationChartContainerUTMB');
     const lapChartContainer = document.querySelector('.chart-container');
     analysisTab.addEventListener('click', () => {
         analysisChartContainer.style.display = '';
         analysisChartContainer2023.style.display = 'none';
+        correlationChartContainer.style.display = 'none';
+        correlationChartContainerUTMB.style.display = 'none';
         lapChartContainer.style.display = 'none';
         document.getElementById('selectedRunners').style.display = 'none';
         renderAnalysisChart();
@@ -613,20 +1052,44 @@ function setupAnalysisTab() {
     analysisTab2023.addEventListener('click', () => {
         analysisChartContainer.style.display = 'none';
         analysisChartContainer2023.style.display = '';
+        correlationChartContainer.style.display = 'none';
+        correlationChartContainerUTMB.style.display = 'none';
         lapChartContainer.style.display = 'none';
         document.getElementById('selectedRunners').style.display = 'none';
         renderAnalysisChart2023();
+    });
+    correlationTab.addEventListener('click', () => {
+        analysisChartContainer.style.display = 'none';
+        analysisChartContainer2023.style.display = 'none';
+        correlationChartContainer.style.display = '';
+        correlationChartContainerUTMB.style.display = 'none';
+        lapChartContainer.style.display = 'none';
+        document.getElementById('selectedRunners').style.display = 'none';
+        renderCorrelationChart();
+    });
+    utmbCorrelationTab.addEventListener('click', () => {
+        analysisChartContainer.style.display = 'none';
+        analysisChartContainer2023.style.display = 'none';
+        correlationChartContainer.style.display = 'none';
+        correlationChartContainerUTMB.style.display = '';
+        lapChartContainer.style.display = 'none';
+        document.getElementById('selectedRunners').style.display = 'none';
+        renderCorrelationChartUTMB();
     });
     // Restore main chart when switching tabs
     document.getElementById('tab-2025').addEventListener('click', () => {
         analysisChartContainer.style.display = 'none';
         analysisChartContainer2023.style.display = 'none';
+        correlationChartContainer.style.display = 'none';
+        correlationChartContainerUTMB.style.display = 'none';
         lapChartContainer.style.display = '';
         document.getElementById('selectedRunners').style.display = '';
     });
     document.getElementById('tab-2023').addEventListener('click', () => {
         analysisChartContainer.style.display = 'none';
         analysisChartContainer2023.style.display = 'none';
+        correlationChartContainer.style.display = 'none';
+        correlationChartContainerUTMB.style.display = 'none';
         lapChartContainer.style.display = '';
         document.getElementById('selectedRunners').style.display = '';
     });
@@ -931,3 +1394,79 @@ function checkScreenSize() {
         }
     });
 }
+
+// Calculate standardized beta coefficients for multiple regression
+function analyzeContributions() {
+    // Prepare data
+    const data = resultsData.map((runner, idx) => {
+        const bib = runner.Bib;
+        const laps = lapsData.filter(lap => lap.File === bib);
+        const lapTimes = laps.map(lap => parseTimeToMinutes(lap['Lap Split']));
+        const n = lapTimes.length;
+        const startIdx = Math.floor(n / 2);
+        const secondHalfLapTimes = lapTimes.slice(startIdx);
+        const lapsOver55 = secondHalfLapTimes.filter(t => t !== null && t > 55).length;
+        return {
+            position: idx + 1,
+            itra: Number(runner.ItraScore),
+            lapsOver55: lapsOver55
+        };
+    }).filter(d => !isNaN(d.itra));
+
+    // Extract arrays
+    const positions = data.map(d => d.position);
+    const itras = data.map(d => d.itra);
+    const lapsOver55Arr = data.map(d => d.lapsOver55);
+
+    // Standardize variables
+    function standardize(arr) {
+        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+        const std = Math.sqrt(arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length);
+        return arr.map(x => (x - mean) / std);
+    }
+    const posZ = standardize(positions);
+    const itraZ = standardize(itras);
+    const lapsZ = standardize(lapsOver55Arr);
+
+    // Multiple regression: posZ = b1 * itraZ + b2 * lapsZ + error
+    // Use least squares
+    const n = posZ.length;
+    let sumItra2 = 0, sumLaps2 = 0, sumItraLaps = 0, sumItraPos = 0, sumLapsPos = 0;
+    for (let i = 0; i < n; i++) {
+        sumItra2 += itraZ[i] * itraZ[i];
+        sumLaps2 += lapsZ[i] * lapsZ[i];
+        sumItraLaps += itraZ[i] * lapsZ[i];
+        sumItraPos += itraZ[i] * posZ[i];
+        sumLapsPos += lapsZ[i] * posZ[i];
+    }
+    // Solve for b1 and b2
+    const denom = sumItra2 * sumLaps2 - sumItraLaps * sumItraLaps;
+    const b1 = (sumLaps2 * sumItraPos - sumItraLaps * sumLapsPos) / denom;
+    const b2 = (sumItra2 * sumLapsPos - sumItraLaps * sumItraPos) / denom;
+
+    // Output results
+    console.log(`Standardized beta coefficients (share of each factor in final position):`);
+    console.log(`ITRA Score: ${b1.toFixed(3)}`);
+    console.log(`Laps over 55 min (2nd half): ${b2.toFixed(3)}`);
+    console.log(`Higher absolute value means greater influence on final position.`);
+}
+
+// Find which lap in a 24-hour day athletes quit on most
+function analyzeLastLapIn24HourDay() {
+    // Exclude runners with 24 or fewer laps
+    const filtered = resultsData.filter(runner => Number(runner.Laps) > 24);
+
+    // Get last lap within 24-hour cycle for each runner
+    const lastLaps = filtered.map(runner => Number(runner.Laps) % 24 || 24);
+
+    // Count occurrences of each last lap
+    const lapCounts = {};
+    lastLaps.forEach(lap => {
+        lapCounts[lap] = (lapCounts[lap] || 0) + 1;
+    });
+
+    // Output per person and summary
+    console.log('Last lap within 24-hour day per runner:', lastLaps);
+    console.log('Number of runners quitting on each lap (1-24):', lapCounts);
+}
+

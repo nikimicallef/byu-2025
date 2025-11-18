@@ -14,7 +14,8 @@
     "Laps": 114,
     "Miles": 475.0,
     "KM": 764.438,
-    "RaceTime": "88:43:54"
+    "RaceTime": "88:43:54",
+    "ItraScore": 726
   },
   {
     "Place": "RTC",
@@ -31,7 +32,8 @@
     "Laps": 113,
     "Miles": 470.83,
     "KM": 757.732,
-    "RaceTime": "101:28:35"
+    "RaceTime": "101:28:35",
+    "ItraScore": 710
   },
   {
     "Place": "INC",
@@ -48,7 +50,8 @@
     "Laps": 111,
     "Miles": 462.5,
     "KM": 744.321,
-    "RaceTime": "98:18:45"
+    "RaceTime": "98:18:45",
+    "ItraScore": 678
   },
   {
     "Place": "INC",
@@ -65,7 +68,8 @@
     "Laps": 111,
     "Miles": 462.5,
     "KM": 744.321,
-    "RaceTime": "100:28:40"
+    "RaceTime": "100:28:40",
+    "ItraScore": 440
   },
   {
     "Place": "OVER",
@@ -82,7 +86,8 @@
     "Laps": 106,
     "Miles": 441.66,
     "KM": 710.793,
-    "RaceTime": "90:30:27"
+    "RaceTime": "90:30:27",
+    "ItraScore": 712
   },
   {
     "Place": "INC",
@@ -99,7 +104,8 @@
     "Laps": 105,
     "Miles": 437.5,
     "KM": 704.088,
-    "RaceTime": "79:59:17"
+    "RaceTime": "79:59:17",
+    "ItraScore": 634
   },
   {
     "Place": "INC",
@@ -116,7 +122,8 @@
     "Laps": 103,
     "Miles": 429.16,
     "KM": 690.676,
-    "RaceTime": "87:38:04"
+    "RaceTime": "87:38:04",
+    "ItraScore": 710
   },
   {
     "Place": "INC",
@@ -133,7 +140,8 @@
     "Laps": 100,
     "Miles": 416.66,
     "KM": 670.56,
-    "RaceTime": "88:55:19"
+    "RaceTime": "88:55:19",
+    "ItraScore": 626
   },
   {
     "Place": "INC",
@@ -150,7 +158,8 @@
     "Laps": 98,
     "Miles": 408.33,
     "KM": 657.148,
-    "RaceTime": "86:55:00"
+    "RaceTime": "86:55:00",
+    "ItraScore": 389
   },
   {
     "Place": "RTC",
@@ -167,7 +176,8 @@
     "Laps": 95,
     "Miles": 395.83,
     "KM": 637.032,
-    "RaceTime": "81:07:08"
+    "RaceTime": "81:07:08",
+    "ItraScore": 641
   },
   {
     "Place": "INC",
@@ -184,7 +194,8 @@
     "Laps": 93,
     "Miles": 387.5,
     "KM": 623.62,
-    "RaceTime": "78:07:57"
+    "RaceTime": "78:07:57",
+    "ItraScore": 654
   },
   {
     "Place": "OVER",
@@ -201,7 +212,8 @@
     "Laps": 92,
     "Miles": 383.33,
     "KM": 616.915,
-    "RaceTime": "80:53:31"
+    "RaceTime": "80:53:31",
+    "ItraScore": 644
   },
   {
     "Place": "INC",
@@ -218,7 +230,8 @@
     "Laps": 88,
     "Miles": 366.66,
     "KM": 590.092,
-    "RaceTime": "74:36:49"
+    "RaceTime": "74:36:49",
+    "ItraScore": 573
   },
   {
     "Place": "OVER",
@@ -235,7 +248,8 @@
     "Laps": 88,
     "Miles": 366.66,
     "KM": 590.092,
-    "RaceTime": "79:37:26"
+    "RaceTime": "79:37:26",
+    "ItraScore": 622
   },
   {
     "Place": "INC",
@@ -252,7 +266,8 @@
     "Laps": 87,
     "Miles": 362.5,
     "KM": 583.387,
-    "RaceTime": "73:59:40"
+    "RaceTime": "73:59:40",
+    "ItraScore": 619
   },
   {
     "Place": "INC",
@@ -269,7 +284,8 @@
     "Laps": 86,
     "Miles": 358.33,
     "KM": 576.681,
-    "RaceTime": "71:39:28"
+    "RaceTime": "71:39:28",
+    "ItraScore": 716
   },
   {
     "Place": "INC",
@@ -286,7 +302,8 @@
     "Laps": 80,
     "Miles": 333.33,
     "KM": 536.448,
-    "RaceTime": "64:19:36"
+    "RaceTime": "64:19:36",
+    "ItraScore": 763
   },
   {
     "Place": "OVER",
@@ -303,7 +320,8 @@
     "Laps": 80,
     "Miles": 333.33,
     "KM": 536.448,
-    "RaceTime": "68:39:14"
+    "RaceTime": "68:39:14",
+    "ItraScore": 615
   },
   {
     "Place": "RTC",
@@ -320,7 +338,8 @@
     "Laps": 77,
     "Miles": 320.83,
     "KM": 516.331,
-    "RaceTime": "63:09:56"
+    "RaceTime": "63:09:56",
+    "ItraScore": 608
   },
   {
     "Place": "OVER",
@@ -337,7 +356,8 @@
     "Laps": 77,
     "Miles": 320.83,
     "KM": 516.331,
-    "RaceTime": "68:51:08"
+    "RaceTime": "68:51:08",
+    "ItraScore": 590
   },
   {
     "Place": "OVER",
@@ -354,7 +374,8 @@
     "Laps": 76,
     "Miles": 316.66,
     "KM": 509.625,
-    "RaceTime": "62:33:08"
+    "RaceTime": "62:33:08",
+    "ItraScore": 524
   },
   {
     "Place": "OVER",
@@ -371,7 +392,8 @@
     "Laps": 75,
     "Miles": 312.5,
     "KM": 502.92,
-    "RaceTime": "58:39:50"
+    "RaceTime": "58:39:50",
+    "ItraScore": 0
   },
   {
     "Place": "RTC",
@@ -388,7 +410,8 @@
     "Laps": 75,
     "Miles": 312.5,
     "KM": 502.92,
-    "RaceTime": "61:50:15"
+    "RaceTime": "61:50:15",
+    "ItraScore": 635
   },
   {
     "Place": "INC",
@@ -405,7 +428,8 @@
     "Laps": 74,
     "Miles": 308.33,
     "KM": 496.214,
-    "RaceTime": "60:06:27"
+    "RaceTime": "60:06:27",
+    "ItraScore": 0
   },
   {
     "Place": "OVER",
@@ -422,7 +446,8 @@
     "Laps": 74,
     "Miles": 308.33,
     "KM": 496.214,
-    "RaceTime": "62:41:32"
+    "RaceTime": "62:41:32",
+    "ItraScore": 602
   },
   {
     "Place": "INC",
@@ -439,7 +464,8 @@
     "Laps": 73,
     "Miles": 304.16,
     "KM": 489.508,
-    "RaceTime": "65:12:53"
+    "RaceTime": "65:12:53",
+    "ItraScore": 0
   },
   {
     "Place": "RTC",
@@ -456,7 +482,8 @@
     "Laps": 72,
     "Miles": 300.0,
     "KM": 482.803,
-    "RaceTime": "58:21:45"
+    "RaceTime": "58:21:45",
+    "ItraScore": 655
   },
   {
     "Place": "RTC",
@@ -473,7 +500,8 @@
     "Laps": 70,
     "Miles": 291.66,
     "KM": 469.392,
-    "RaceTime": "49:25:45"
+    "RaceTime": "49:25:45",
+    "ItraScore": 670
   },
   {
     "Place": "OVER",
@@ -490,7 +518,8 @@
     "Laps": 67,
     "Miles": 279.16,
     "KM": 449.275,
-    "RaceTime": "53:35:40"
+    "RaceTime": "53:35:40",
+    "ItraScore": 617
   },
   {
     "Place": "OVER",
@@ -507,7 +536,8 @@
     "Laps": 67,
     "Miles": 279.16,
     "KM": 449.275,
-    "RaceTime": "55:09:09"
+    "RaceTime": "55:09:09",
+    "ItraScore": 675
   },
   {
     "Place": "OVER",
@@ -524,7 +554,8 @@
     "Laps": 67,
     "Miles": 279.16,
     "KM": 449.275,
-    "RaceTime": "55:43:57"
+    "RaceTime": "55:43:57",
+    "ItraScore": 669
   },
   {
     "Place": "INC",
@@ -541,7 +572,8 @@
     "Laps": 65,
     "Miles": 270.83,
     "KM": 435.864,
-    "RaceTime": "57:06:58"
+    "RaceTime": "57:06:58",
+    "ItraScore": 638
   },
   {
     "Place": "INC",
@@ -558,7 +590,8 @@
     "Laps": 65,
     "Miles": 270.83,
     "KM": 435.864,
-    "RaceTime": "58:25:21"
+    "RaceTime": "58:25:21",
+    "ItraScore": 615
   },
   {
     "Place": "RTC",
@@ -575,7 +608,8 @@
     "Laps": 63,
     "Miles": 262.5,
     "KM": 422.452,
-    "RaceTime": "50:38:10"
+    "RaceTime": "50:38:10",
+    "ItraScore": 792
   },
   {
     "Place": "INC",
@@ -592,7 +626,8 @@
     "Laps": 63,
     "Miles": 262.5,
     "KM": 422.452,
-    "RaceTime": "52:28:15"
+    "RaceTime": "52:28:15",
+    "ItraScore": 667
   },
   {
     "Place": "INC",
@@ -609,7 +644,8 @@
     "Laps": 63,
     "Miles": 262.5,
     "KM": 422.452,
-    "RaceTime": "55:13:43"
+    "RaceTime": "55:13:43",
+    "ItraScore": 0
   },
   {
     "Place": "OVER",
@@ -626,7 +662,8 @@
     "Laps": 62,
     "Miles": 258.33,
     "KM": 415.747,
-    "RaceTime": "45:58:33"
+    "RaceTime": "45:58:33",
+    "ItraScore": 616
   },
   {
     "Place": "DQ",
@@ -643,7 +680,8 @@
     "Laps": 61,
     "Miles": 254.16,
     "KM": 409.041,
-    "RaceTime": "42:44:14"
+    "RaceTime": "42:44:14",
+    "ItraScore": 724
   },
   {
     "Place": "INC",
@@ -660,7 +698,8 @@
     "Laps": 61,
     "Miles": 254.16,
     "KM": 409.041,
-    "RaceTime": "50:32:28"
+    "RaceTime": "50:32:28",
+    "ItraScore": 611
   },
   {
     "Place": "INC",
@@ -677,7 +716,8 @@
     "Laps": 60,
     "Miles": 250.0,
     "KM": 402.336,
-    "RaceTime": "49:35:55"
+    "RaceTime": "49:35:55",
+    "ItraScore": 713
   },
   {
     "Place": "OVER",
@@ -694,7 +734,8 @@
     "Laps": 59,
     "Miles": 245.83,
     "KM": 395.63,
-    "RaceTime": "49:44:09"
+    "RaceTime": "49:44:09",
+    "ItraScore": 635
   },
   {
     "Place": "OVER",
@@ -711,7 +752,8 @@
     "Laps": 59,
     "Miles": 245.83,
     "KM": 395.63,
-    "RaceTime": "51:08:44"
+    "RaceTime": "51:08:44",
+    "ItraScore": 804
   },
   {
     "Place": "OVER",
@@ -728,7 +770,8 @@
     "Laps": 57,
     "Miles": 237.5,
     "KM": 382.219,
-    "RaceTime": "43:53:34"
+    "RaceTime": "43:53:34",
+    "ItraScore": 724
   },
   {
     "Place": "OVER",
@@ -745,7 +788,8 @@
     "Laps": 56,
     "Miles": 233.33,
     "KM": 375.513,
-    "RaceTime": "44:47:11"
+    "RaceTime": "44:47:11",
+    "ItraScore": 635
   },
   {
     "Place": "INC",
@@ -762,7 +806,8 @@
     "Laps": 56,
     "Miles": 233.33,
     "KM": 375.513,
-    "RaceTime": "46:42:17"
+    "RaceTime": "46:42:17",
+    "ItraScore": 596
   },
   {
     "Place": "INC",
@@ -779,7 +824,8 @@
     "Laps": 55,
     "Miles": 229.16,
     "KM": 368.808,
-    "RaceTime": "49:37:36"
+    "RaceTime": "49:37:36",
+    "ItraScore": 590
   },
   {
     "Place": "INC",
@@ -796,7 +842,8 @@
     "Laps": 54,
     "Miles": 225.0,
     "KM": 362.102,
-    "RaceTime": "47:37:08"
+    "RaceTime": "47:37:08",
+    "ItraScore": 601
   },
   {
     "Place": "OVER",
@@ -813,7 +860,8 @@
     "Laps": 54,
     "Miles": 225.0,
     "KM": 362.102,
-    "RaceTime": "47:44:12"
+    "RaceTime": "47:44:12",
+    "ItraScore": 627
   },
   {
     "Place": "OVER",
@@ -830,7 +878,8 @@
     "Laps": 52,
     "Miles": 216.66,
     "KM": 348.691,
-    "RaceTime": "44:14:25"
+    "RaceTime": "44:14:25",
+    "ItraScore": 550
   },
   {
     "Place": "OVER",
@@ -847,7 +896,8 @@
     "Laps": 51,
     "Miles": 212.5,
     "KM": 341.985,
-    "RaceTime": "40:05:17"
+    "RaceTime": "40:05:17",
+    "ItraScore": 620
   },
   {
     "Place": "OVER",
@@ -864,7 +914,8 @@
     "Laps": 51,
     "Miles": 212.5,
     "KM": 341.985,
-    "RaceTime": "40:40:06"
+    "RaceTime": "40:40:06",
+    "ItraScore": 0
   },
   {
     "Place": "OVER",
@@ -881,7 +932,8 @@
     "Laps": 50,
     "Miles": 208.33,
     "KM": 335.28,
-    "RaceTime": "40:10:19"
+    "RaceTime": "40:10:19",
+    "ItraScore": 547
   },
   {
     "Place": "RTC",
@@ -898,7 +950,8 @@
     "Laps": 43,
     "Miles": 179.16,
     "KM": 288.34,
-    "RaceTime": "34:51:33"
+    "RaceTime": "34:51:33",
+    "ItraScore": 594
   },
   {
     "Place": "INC",
@@ -915,7 +968,8 @@
     "Laps": 42,
     "Miles": 175.0,
     "KM": 281.635,
-    "RaceTime": "35:31:46"
+    "RaceTime": "35:31:46",
+    "ItraScore": 510
   },
   {
     "Place": "INC",
@@ -932,7 +986,8 @@
     "Laps": 42,
     "Miles": 175.0,
     "KM": 281.635,
-    "RaceTime": "36:05:49"
+    "RaceTime": "36:05:49",
+    "ItraScore": 573
   },
   {
     "Place": "OVER",
@@ -949,7 +1004,8 @@
     "Laps": 42,
     "Miles": 175.0,
     "KM": 281.635,
-    "RaceTime": "36:16:16"
+    "RaceTime": "36:16:16",
+    "ItraScore": 0
   },
   {
     "Place": "OVER",
@@ -966,7 +1022,8 @@
     "Laps": 42,
     "Miles": 175.0,
     "KM": 281.635,
-    "RaceTime": "36:35:01"
+    "RaceTime": "36:35:01",
+    "ItraScore": 637
   },
   {
     "Place": "INC",
@@ -983,7 +1040,8 @@
     "Laps": 40,
     "Miles": 166.66,
     "KM": 268.224,
-    "RaceTime": "35:18:27"
+    "RaceTime": "35:18:27",
+    "ItraScore": 0
   },
   {
     "Place": "INC",
@@ -1000,7 +1058,8 @@
     "Laps": 40,
     "Miles": 166.66,
     "KM": 268.224,
-    "RaceTime": "46:00:00"
+    "RaceTime": "46:00:00",
+    "ItraScore": 602
   },
   {
     "Place": "RTC",
@@ -1017,7 +1076,8 @@
     "Laps": 39,
     "Miles": 162.5,
     "KM": 261.518,
-    "RaceTime": "35:00:46"
+    "RaceTime": "35:00:46",
+    "ItraScore": 454
   },
   {
     "Place": "OVER",
@@ -1034,7 +1094,8 @@
     "Laps": 38,
     "Miles": 158.33,
     "KM": 254.812,
-    "RaceTime": "44:00:00"
+    "RaceTime": "44:00:00",
+    "ItraScore": 351
   },
   {
     "Place": "RTC",
@@ -1051,7 +1112,8 @@
     "Laps": 38,
     "Miles": 158.33,
     "KM": 254.812,
-    "RaceTime": "45:00:00"
+    "RaceTime": "45:00:00",
+    "ItraScore": 684
   },
   {
     "Place": "RTC",
@@ -1068,7 +1130,8 @@
     "Laps": 36,
     "Miles": 150.0,
     "KM": 241.401,
-    "RaceTime": "31:07:44"
+    "RaceTime": "31:07:44",
+    "ItraScore": 510
   },
   {
     "Place": "DQ",
@@ -1085,7 +1148,8 @@
     "Laps": 35,
     "Miles": 145.83,
     "KM": 234.696,
-    "RaceTime": "27:14:33"
+    "RaceTime": "27:14:33",
+    "ItraScore": 615
   },
   {
     "Place": "INC",
@@ -1102,7 +1166,8 @@
     "Laps": 35,
     "Miles": 145.83,
     "KM": 234.696,
-    "RaceTime": "27:40:52"
+    "RaceTime": "27:40:52",
+    "ItraScore": 678
   },
   {
     "Place": "INC",
@@ -1119,7 +1184,8 @@
     "Laps": 28,
     "Miles": 116.66,
     "KM": 187.756,
-    "RaceTime": "21:18:29"
+    "RaceTime": "21:18:29",
+    "ItraScore": 634
   },
   {
     "Place": "INC",
@@ -1136,7 +1202,8 @@
     "Laps": 25,
     "Miles": 104.16,
     "KM": 167.64,
-    "RaceTime": "21:10:29"
+    "RaceTime": "21:10:29",
+    "ItraScore": 628
   },
   {
     "Place": "RTC",
@@ -1153,7 +1220,8 @@
     "Laps": 24,
     "Miles": 100.0,
     "KM": 160.934,
-    "RaceTime": "18:31:24"
+    "RaceTime": "18:31:24",
+    "ItraScore": 854
   },
   {
     "Place": "RTC",
@@ -1170,7 +1238,8 @@
     "Laps": 20,
     "Miles": 83.33,
     "KM": 134.112,
-    "RaceTime": "17:30:53"
+    "RaceTime": "17:30:53",
+    "ItraScore": 622
   },
   {
     "Place": "OVER",
@@ -1187,7 +1256,8 @@
     "Laps": 17,
     "Miles": 70.83,
     "KM": 113.995,
-    "RaceTime": "13:32:30"
+    "RaceTime": "13:32:30",
+    "ItraScore": 650
   },
   {
     "Place": "RTC",
@@ -1204,7 +1274,8 @@
     "Laps": 16,
     "Miles": 66.66,
     "KM": 107.289,
-    "RaceTime": "13:44:41"
+    "RaceTime": "13:44:41",
+    "ItraScore": 641
   },
   {
     "Place": "OVER",
@@ -1221,6 +1292,7 @@
     "Laps": 6,
     "Miles": 25.0,
     "KM": 40.233,
-    "RaceTime": "5:07:07"
+    "RaceTime": "5:07:07",
+    "ItraScore": 660
   }
 ]
